@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNIST Classifier Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Image Prediction Result</h1>
+    <div class="image-container">
+        <img src="{{ url_for('static', filename='uploaded_images/' + image_file) }}" alt="Uploaded Image">
+    </div>
+    <div class="result-info">
+        <h2>Predicted Class:</h2>
+        <p>{{ predicted_class }}</p>
+        <a href="/">Back to Upload</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,33 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.image-container {
+    margin-bottom: 20px;
+}
+
+.result-info {
+    background-color: #f0f0f0;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.result-info h2 {
+    margin-bottom: 10px;
+}
+
+.result-info p {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+.result-info a {
+    display: block;
+    margin-top: 10px;
+    color: #007bff;
+    text-decoration: none;
+}
