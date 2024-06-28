@@ -29,9 +29,9 @@ wandb.init(project="mnist-classification",
 x_train, x_test = x_train / 255.0, x_test / 255.0
 
 # Convert numpy arrays to tensors
-x_train_tensor = torch.tensor(x_train, dtype=torch.float32).unsqueeze(1)  # Add channel dimension
+x_train_tensor = torch.tensor(x_train, dtype=torch.float32).unsqueeze(1)
 y_train_tensor = torch.tensor(y_train, dtype=torch.long)
-x_test_tensor = torch.tensor(x_test, dtype=torch.float32).unsqueeze(1)    # Add channel dimension
+x_test_tensor = torch.tensor(x_test, dtype=torch.float32).unsqueeze(1)
 y_test_tensor = torch.tensor(y_test, dtype=torch.long)
 
 # Create datasets and data loaders
@@ -79,7 +79,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 
 
-# Training loop
+# TRAINING LOOP
 num_epochs = 7
 for epoch in range(num_epochs):
     model.train()
@@ -97,7 +97,7 @@ for epoch in range(num_epochs):
     print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {avg_train_loss:.4f}")
     wandb.log({"train_loss": avg_train_loss})
 
-    # Validation step
+    # VALIDATION STEP
     model.eval()
     val_loss = 0.0
     correct = 0
@@ -117,7 +117,7 @@ for epoch in range(num_epochs):
     print(f"Validation Loss: {avg_val_loss:.4f}, Accuracy: {val_accuracy:.2f}%")
     wandb.log({"val_loss": avg_val_loss, "val_accuracy": val_accuracy})
 
-# Evaluate the model
+
 def evaluate(model, test_loader):
     model.eval()
     correct = 0
@@ -146,7 +146,6 @@ def evaluate(model, test_loader):
     accuracy = 100 * correct / total
     print(f"Accuracy: {accuracy:.2f}%")
 
-    # Calculate additional metrics
     precision = precision_score(all_labels, all_preds, average='macro')
     recall = recall_score(all_labels, all_preds, average='macro')
     f1 = f1_score(all_labels, all_preds, average='macro')

@@ -27,13 +27,13 @@ wandb.init(project="mnist-classification",
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
 x_train, x_test = x_train / 255.0, x_test / 255.0
 
-# Convert numpy arrays to tensors
-x_train_tensor = torch.tensor(x_train, dtype=torch.float32).unsqueeze(1)  # Add channel dimension
+
+x_train_tensor = torch.tensor(x_train, dtype=torch.float32).unsqueeze(1)
 y_train_tensor = torch.tensor(y_train, dtype=torch.long)
-x_test_tensor = torch.tensor(x_test, dtype=torch.float32).unsqueeze(1)    # Add channel dimension
+x_test_tensor = torch.tensor(x_test, dtype=torch.float32).unsqueeze(1)
 y_test_tensor = torch.tensor(y_test, dtype=torch.long)
 
-# Create datasets and data loaders
+
 full_train_dataset = TensorDataset(x_train_tensor, y_train_tensor)
 train_size = int(0.8 * len(full_train_dataset))
 val_size = len(full_train_dataset) - train_size
@@ -42,7 +42,7 @@ train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=1000, shuffle=False)
 test_loader = DataLoader(TensorDataset(x_test_tensor, y_test_tensor), batch_size=1000, shuffle=False)
 
-# Define CNN model
+
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
@@ -70,7 +70,7 @@ class CNN(nn.Module):
         x = self.fc3(x)
         return x
 
-# Initialize model, loss function, and optimizer
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = CNN().to(device)
 criterion = nn.CrossEntropyLoss()
@@ -78,7 +78,6 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 
 
-# Training loop
 num_epochs = 7
 for epoch in range(num_epochs):
     model.train()
@@ -96,7 +95,6 @@ for epoch in range(num_epochs):
     print(f"Epoch [{epoch + 1}/{num_epochs}], Loss: {avg_train_loss:.4f}")
     wandb.log({"train_loss": avg_train_loss})
 
-    # Validation step
     model.eval()
     val_loss = 0.0
     correct = 0
@@ -116,7 +114,7 @@ for epoch in range(num_epochs):
     print(f"Validation Loss: {avg_val_loss:.4f}, Accuracy: {val_accuracy:.2f}%")
     wandb.log({"val_loss": avg_val_loss, "val_accuracy": val_accuracy})
 
-# Evaluate the model
+
 def evaluate(model, test_loader):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.eval()
