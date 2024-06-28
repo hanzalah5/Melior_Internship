@@ -1,0 +1,14 @@
+THIS DIRECTORY CONTAINS 2 FILES. 
+
+A. SWEEP IMPLEMNTATION:
+
+This file contains the CNN model training code for sweep generation. I have commented where there were chnages in the code. Sweep allows us to run the model and search for the best hyper parameters. All the parameters are logged in a sweep run.
+
+B. WANDB IMPLEMENTATION:
+
+This file contains the CNN model training with using weights and biases to log all the accuracy metrics and confusion metrix. A report is finally generated in the end showing the model outputs on the testing data. 
+
+LINK : https://wandb.ai/hanzalah-NUCES/mnist-classification/reports/Deep-CNN-for-MNIST-classification--Vmlldzo4NDg1MzU0
+
+
+LINK : https://wandb.ai/hanzalah-NUCES/mnist-classification/reports/Sweep-Runs-on-CNN--Vmlldzo4NDg3ODQ0

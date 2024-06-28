@@ -1,0 +1,8 @@
+THIS DIRECTORY HAS THE CLEARML INTEGRATED WITH THE MODEL DURING TRAINING
+
+FILE: clearml_Implementation.py
+
+I have integrated the clearml during the tarining of CNN model. I have commented in the code where clearml instructions have been provided. the link below allows you to see the model charts and its tarining, validation metrics and confusion matrix.
+
+
+link : https://app.clear.ml/projects/9536f504524c4ecb99c1afd015ae19a9/experiments/95c68b512e644926925b5790ed13b8bc/output/execution
