@@ -6,7 +6,11 @@ from torchvision import transforms
 from PIL import Image
 from flask import Flask, request, render_template, send_from_directory
 
-# Define the CNN model (same as your training model)
+# THIS IS THE SAME CODE AS WE HAD EMPLOYED BEFORE.
+# WE HAD SAVED THE MODEL PARAMETERS IN THE 'model' DIRECTORY
+# WE WILL LOAD THEM FROM THERE
+# THE WEIGHTS AND BIAS WILL BE USED 
+
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
@@ -34,12 +38,15 @@ class CNN(nn.Module):
         x = self.fc3(x)
         return x
 
-# Initialize the model and load the trained weights
-model = CNN()
-model.load_state_dict(torch.load('model/mnist_cnn.pth', map_location=torch.device('cpu')))
-model.eval()
 
-# Define the image transform
+# HERE WE UPLOAD THE MODEL PARAMETERS
+model = torch.load('model/mnist_cnn.pth', map_location=torch.device('cpu'))
+
+# THIS IS HOW WE WILL TRANSFORM THE INPUT IMAGE
+# USER CAN INPUT ANY SHAPE AND SIZE OF IMAGE
+# WE WILL CONVERT IT TO 28x28 GRAYSCALE IMAGE
+# AND THEN NORMALIZE IT
+
 transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=1),
     transforms.Resize((28, 28)),
@@ -47,13 +54,15 @@ transform = transforms.Compose([
     transforms.Normalize((0.1307,), (0.3081,))
 ])
 
-# Initialize Flask application
+
 app = Flask(__name__)
-# Ensure the directory exists
+
+# UPLOAD_FOLDER WILL STORE THE UPLOADED IMAGES
 UPLOAD_FOLDER = 'static/uploaded_images'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
+# THIS FUNCTION WILL RENDER THE IMAGE 
 @app.route('/')
 def index():
     return render_template('index.html')

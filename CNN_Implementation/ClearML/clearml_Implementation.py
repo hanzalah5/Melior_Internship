@@ -1,6 +1,4 @@
 # THIS IS CNN MODEL TRAINING USING CLEARML
-
-import os
 import torch
 import torch.nn as nn
 import numpy as np
@@ -16,18 +14,41 @@ from clearml import Task, Logger
 # CLEARML IS INTILIZED HERE WITH THE TASK NAME AND PROJECT NAME
 task = Task.init(project_name="mnist-classification", task_name="CNN Training")
 
-# THIS IS THE SAME CODE AS BEFORE
 
+# THE MNIST DATASET IS IMPORTED FROM THE SKLEARN LIBRARY.
+# THE DATASET IS SPLIT INTO TRAINING AND TESTING DATA.
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+
+# THE IMAGES ARE NORMALIZED TO A VALUE BETWEEN 0 AND 1.
+# THIS IS DONE TO IMPROVE THE TRAINING PROCESS.
+# WHAT HAPPENS IF NOT NORMALIZED?
+
+# ----------------------------------------------------------------
+# If we do not normalize the data: The learning process may become slower and less efficient.
+# as features with larger ranges can dominate gradient updates, leading to slower convergence. 
+# This can result in poor model performance, 
+# as models using gradient descent may be disproportionately influenced by features with larger scales.
+#  Additionally, the lack of normalization complicates hyperparameter. Making it difficult to compare the importance of different features. 
+# ----------------------------------------------------------------
 x_train, x_test = x_train / 255.0, x_test / 255.0
 
-# Convert numpy arrays to tensors
+
+
+# CONVERSION OF NUMPY ARRAYS TO TENSORS IN PYTORCH
+# THIS IS NEEDED BECAUSE PYTORCH WORKS WITH TENSORS. 
+# IT IS OPTIMIZED FOR CALCULATIONS ON TENSORS.
+# IT ALLOWS FOR PARALLEL COMPUTATIONS
+# THE TENSORS ARE USED TO CREATE THE DATASET AND DATALOADER IN THE NEXT CODE
+
+
 x_train_tensor = torch.tensor(x_train, dtype=torch.float32).unsqueeze(1)
 y_train_tensor = torch.tensor(y_train, dtype=torch.long)
 x_test_tensor = torch.tensor(x_test, dtype=torch.float32).unsqueeze(1)
 y_test_tensor = torch.tensor(y_test, dtype=torch.long)
 
-# Create datasets and data loaders
+
+
+# CREATING THE DATALOADERS
 full_train_dataset = TensorDataset(x_train_tensor, y_train_tensor)
 train_size = int(0.8 * len(full_train_dataset))
 val_size = len(full_train_dataset) - train_size
@@ -36,7 +57,22 @@ train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=1000, shuffle=False)
 test_loader = DataLoader(TensorDataset(x_test_tensor, y_test_tensor), batch_size=1000, shuffle=False)
 
-# Define CNN model
+
+
+
+
+# THE CNN MODEL IS DEFINED BELOW
+# THE CNN MODEL CONSISTS OF THREE CONVOLUTIONAL LAYERS AND TWO FULLY CONNECTED LAYERS
+# A MAX POOLING LAYER IS USED TO REDUCE THE DIMENSIONALITY OF THE DATA
+# THIS MAX POOL LAYER IS APPLIED BETWEEN THE CONVOLUTIONAL LAYERS AND THE FULLY CONNECTED LAYERS
+# A DROPOUT LAYER IS USED TO PREVENT OVERFITTING
+
+# THE FIRST CONV LAYER HAS 32 FILTERS, THE SECOND CONV LAYER HAS 64 FILTERS AND THE THIRD CONV LAYER HAS 128 FILTERS
+# THE STRIDE OF 1 MEANS THAT THE FILTER MOVES ONE PIXEL AT A TIME
+# THE PADDING OF 1 MEANS THAT THE INPUT IMAGE IS PADDDED WITH ZEROS TO MAINTAIN THE SAME DIMENSIONALITY
+# THE KERNEL SIZE OF 3 MEANS THAT THE FILTER SIZE IS 3X3
+
+
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
@@ -51,6 +87,11 @@ class CNN(nn.Module):
         self.fc1 = nn.Linear(128 * 3 * 3, 256)
         self.fc2 = nn.Linear(256, 128)
         self.fc3 = nn.Linear(128, 10)
+
+    # THIS FUNCTION DESCRIBES THE FORWARD PASS OF THE CNN MODEL
+    # THE FORWARD FUNCTION DESCRIBES HOW THE DATA FLOWS THROUGH THE NETWORK
+    # THE RELU ACTIVATION FUNCTION IS USED AFTER EACH CONVOLUTIONAL LAYER AND FULLY CONNECTED LAYER
+    # THE RELU FUNCTION IS USED TO INTRODUCE NON-LINEARITY INTO THE MODEL    
     
     def forward(self, x):
         x = self.pool(torch.tanh(self.bn1(self.conv1(x))))
@@ -65,12 +106,30 @@ class CNN(nn.Module):
         return x
 
 # THIS IS THE CHECK FOR GPU AVALABILITY
+# IF GPU IS AVAILABLE THEN THE MODEL WILL BE TRAINED ON GPU
+# ELSE THE MODEL WILL BE TRAINED ON CPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# THE MODEL IS INITIALIZED HERE
+# THE MODEL IS MOVED TO THE DEVICE
 model = CNN().to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 # TRAIN THE CNN MODEL
+# HERE IS THE CODE THAT ITERATES THROUGH THE MODEL AND TRAINS IT
+# THE MODEL IS INTILIAZED WITH THE CNN CLASS
+# THEN THE FOLLOWING ARE DEFINED:
+# THE LOSS FUNCTION (CROSS ENTROPY LOSS)
+# THE OPTIMIZER (ADAM OPTIMIZER)
+# THE LEARNING RATE (0.001)
+# THE NUMBER OF EPOCHS (7)
+
+
+# THEN EVALUATION IS PERFORMED: 
+# THE TRAINING LOOP ITERATES THROUGH THE TRAINING DATA AND UPDATES THE WEIGHTS OF THE MODEL
+# THE MODEL IS THEN EVALUATED ON THE VALIDATION DATA TO CHECK FOR OVERFITTING
+
 num_epochs = 7
 for epoch in range(num_epochs):
     model.train()
@@ -109,7 +168,16 @@ for epoch in range(num_epochs):
     Logger.current_logger().report_scalar("val_loss", "Loss", iteration=epoch, value=avg_val_loss)
     Logger.current_logger().report_scalar("val_accuracy", "Accuracy", iteration=epoch, value=val_accuracy)
 
-# Evaluate the model
+    # HERE WE LOG THE MODEL WEIGHTS TO CLEARML
+    # THESE ARE DISPLAYED ON THE CLEARML DASHBOARD
+    # THE TRAINING LOSS AND VALIDATION LOSS ARE ALSO DISPLAYED ON THE DASHBOARD
+    # THESE METRICS ARE USED TO MONITOR THE TRAINING PROCESS
+
+
+
+
+
+
 def evaluate(model, test_loader):
     model.eval()
     correct = 0
@@ -127,6 +195,15 @@ def evaluate(model, test_loader):
             all_labels.extend(labels.cpu().numpy())
             all_preds.extend(predicted.cpu().numpy())
 
+
+
+    
+
+    # FINAL METRICS ARE CALCULATED HERE
+    # THE ACCURACY, PRECISION, RECALL AND F1 SCORE ARE CALCULATED
+    # THESE METRICS ARE USED TO EVALUATE THE PERFORMANCE
+    # OF THE MODEL ON THE TEST DATA
+    
     accuracy = 100 * correct / total
     print(f"Accuracy: {accuracy:.2f}%")
 
@@ -139,7 +216,10 @@ def evaluate(model, test_loader):
     print(f"Recall: {recall:.2f}")
     print(f"F1 Score: {f1:.2f}")
 
-    # HERE WE LOG THE METRIC TO CLEARML 
+    # HERE WE LOG THE METRIC TO CLEARML
+    # HERE WE DIFINE WHAT METRICS TO LOG TO CLEARML
+    # THESE METRICS ARE DISPLAYED ON THE CLEARML DASHBOARD
+    
     Logger.current_logger().report_scalar("test_accuracy", "Accuracy", iteration=0, value=accuracy)
     Logger.current_logger().report_scalar("test_precision", "Precision", iteration=0, value=precision)
     Logger.current_logger().report_scalar("test_recall", "Recall", iteration=0, value=recall)

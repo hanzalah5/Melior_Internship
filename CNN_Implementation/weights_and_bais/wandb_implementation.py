@@ -1,4 +1,8 @@
-import os
+# THESE ARE THE LIBRARIES NEEEDED TO RUN THE CNN MODEL IN PYTORCH.
+# SKLEARN IS USED TO IMPORT THE DATASET.
+# MATPLOTLIB IS USED TO PLOT THE IMAGES.
+
+
 import torch
 import torch.nn as nn
 import numpy as np
@@ -12,7 +16,15 @@ import wandb
 from sklearn.metrics import precision_score, recall_score, f1_score, confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
-# Initialize wandb
+
+
+
+# WANDB IS INITILIZED HERE
+# WE NAME THE PROJECT AS 'mnist-classification'\
+# WE DEFINE THE CONFIGURATION PARAMETERS
+# WE DEFINE THE LEARNING RATE, EPOCHS, BATCH SIZE, AND ACTIVATION FUNCTION
+# WE WILL USE THESE PARAMETERS TO TUNE THE MODEL
+
 wandb.init(project="mnist-classification",
            config = {
     "learning_rate": 0.001,
@@ -24,17 +36,41 @@ wandb.init(project="mnist-classification",
 
 
 
-# Load MNIST data
+# THE MNIST DATASET IS IMPORTED FROM THE SKLEARN LIBRARY.
+# THE DATASET IS SPLIT INTO TRAINING AND TESTING DATA.
 (x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data()
+
+
+
+# THE IMAGES ARE NORMALIZED TO A VALUE BETWEEN 0 AND 1.
+# THIS IS DONE TO IMPROVE THE TRAINING PROCESS.
+# WHAT HAPPENS IF NOT NORMALIZED?
+
+# ----------------------------------------------------------------
+# If we do not normalize the data: The learning process may become slower and less efficient.
+# as features with larger ranges can dominate gradient updates, leading to slower convergence. 
+# This can result in poor model performance, 
+# as models using gradient descent may be disproportionately influenced by features with larger scales.
+#  Additionally, the lack of normalization complicates hyperparameter. Making it difficult to compare the importance of different features. 
+# ----------------------------------------------------------------
+
 x_train, x_test = x_train / 255.0, x_test / 255.0
 
-# Convert numpy arrays to tensors
+
+# CONVERSION OF NUMPY ARRAYS TO TENSORS IN PYTORCH
+# THIS IS NEEDED BECAUSE PYTORCH WORKS WITH TENSORS. 
+# IT IS OPTIMIZED FOR CALCULATIONS ON TENSORS.
+# IT ALLOWS FOR PARALLEL COMPUTATIONS
+# THE TENSORS ARE USED TO CREATE THE DATASET AND DATALOADER IN THE NEXT CODE
+
+
 x_train_tensor = torch.tensor(x_train, dtype=torch.float32).unsqueeze(1)
 y_train_tensor = torch.tensor(y_train, dtype=torch.long)
 x_test_tensor = torch.tensor(x_test, dtype=torch.float32).unsqueeze(1)
 y_test_tensor = torch.tensor(y_test, dtype=torch.long)
 
-# Create datasets and data loaders
+
+# CREATING THE DATALOADERS
 full_train_dataset = TensorDataset(x_train_tensor, y_train_tensor)
 train_size = int(0.8 * len(full_train_dataset))
 val_size = len(full_train_dataset) - train_size
@@ -43,7 +79,21 @@ train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 val_loader = DataLoader(val_dataset, batch_size=1000, shuffle=False)
 test_loader = DataLoader(TensorDataset(x_test_tensor, y_test_tensor), batch_size=1000, shuffle=False)
 
-# Define CNN model
+
+
+
+
+# THE CNN MODEL IS DEFINED BELOW
+# THE CNN MODEL CONSISTS OF THREE CONVOLUTIONAL LAYERS AND TWO FULLY CONNECTED LAYERS
+# A MAX POOLING LAYER IS USED TO REDUCE THE DIMENSIONALITY OF THE DATA
+# THIS MAX POOL LAYER IS APPLIED BETWEEN THE CONVOLUTIONAL LAYERS AND THE FULLY CONNECTED LAYERS
+# A DROPOUT LAYER IS USED TO PREVENT OVERFITTING
+
+# THE FIRST CONV LAYER HAS 32 FILTERS, THE SECOND CONV LAYER HAS 64 FILTERS AND THE THIRD CONV LAYER HAS 128 FILTERS
+# THE STRIDE OF 1 MEANS THAT THE FILTER MOVES ONE PIXEL AT A TIME
+# THE PADDING OF 1 MEANS THAT THE INPUT IMAGE IS PADDDED WITH ZEROS TO MAINTAIN THE SAME DIMENSIONALITY
+# THE KERNEL SIZE OF 3 MEANS THAT THE FILTER SIZE IS 3X3
+
 class CNN(nn.Module):
     def __init__(self):
         super(CNN, self).__init__()
@@ -59,6 +109,12 @@ class CNN(nn.Module):
         self.fc2 = nn.Linear(256, 128)
         self.fc3 = nn.Linear(128, 10)
     
+
+    # THIS FUNCTION DESCRIBES THE FORWARD PASS OF THE CNN MODEL
+    # THE FORWARD FUNCTION DESCRIBES HOW THE DATA FLOWS THROUGH THE NETWORK
+    # THE RELU ACTIVATION FUNCTION IS USED AFTER EACH CONVOLUTIONAL LAYER AND FULLY CONNECTED LAYER
+    # THE RELU FUNCTION IS USED TO INTRODUCE NON-LINEARITY INTO THE MODEL
+
     def forward(self, x):
         x = self.pool(torch.tanh(self.bn1(self.conv1(x))))
         x = self.pool(torch.tanh(self.bn2(self.conv2(x))))
@@ -71,7 +127,7 @@ class CNN(nn.Module):
         x = self.fc3(x)
         return x
 
-# Initialize model, loss function, and optimizer
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = CNN().to(device)
 criterion = nn.CrossEntropyLoss()
@@ -79,7 +135,20 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 
 
-# TRAINING LOOP
+
+# HERE IS THE CODE THAT ITERATES THROUGH THE MODEL AND TRAINS IT
+# THE MODEL IS INTILIAZED WITH THE CNN CLASS
+# THEN THE FOLLOWING ARE DEFINED:
+# THE LOSS FUNCTION (CROSS ENTROPY LOSS)
+# THE OPTIMIZER (ADAM OPTIMIZER)
+# THE LEARNING RATE (0.001)
+# THE NUMBER OF EPOCHS (7)
+
+
+# THEN EVALUATION IS PERFORMED: 
+# THE TRAINING LOOP ITERATES THROUGH THE TRAINING DATA AND UPDATES THE WEIGHTS OF THE MODEL
+# THE MODEL IS THEN EVALUATED ON THE VALIDATION DATA TO CHECK FOR OVERFITTING
+
 num_epochs = 7
 for epoch in range(num_epochs):
     model.train()
@@ -117,6 +186,13 @@ for epoch in range(num_epochs):
     print(f"Validation Loss: {avg_val_loss:.4f}, Accuracy: {val_accuracy:.2f}%")
     wandb.log({"val_loss": avg_val_loss, "val_accuracy": val_accuracy})
 
+    # HERE WE LOG THE METRICS TO WANDB
+    # THESE ARE DISPLAYED ON THE WANDB DASHBOARD
+    # THE TRAINING LOSS, VALIDATION LOSS AND VALIDATION ACCURACY ARE LOGGED
+    # THESE METRICS ARE USED TO TRACK THE PERFORMANCE OF THE MODEL
+    # AND TO TUNE THE MODEL PARAMETERS BESED ON THE RESULTS RECIEVED
+
+
 
 def evaluate(model, test_loader):
     model.eval()
@@ -136,13 +212,21 @@ def evaluate(model, test_loader):
             all_labels.extend(labels.cpu().numpy())
             all_preds.extend(predicted.cpu().numpy())
 
-            # Log images with predictions
+            # THIS CODE LOGS THE IMAGES PROVIDED TO THE MODLE 
+            # AND THE PREDICTIONS MADE BY THE MODEL
+            # THESE IMAGES ARE DISPLAYED ON THE WANDB DASHBOARD
+
             for img, label, pred in zip(images.cpu(), labels.cpu(), predicted.cpu()):
                 img_np = img.squeeze().numpy()
                 images_with_preds.append(
                     wandb.Image(img_np, caption=f"Label: {label}, Pred: {pred}")
                 )
 
+
+    # FINAL METRICS ARE CALCULATED HERE
+    # THE ACCURACY, PRECISION, RECALL AND F1 SCORE ARE CALCULATED
+    # THESE METRICS ARE USED TO EVALUATE THE PERFORMANCE
+    # OF THE MODEL ON THE TEST DATA
     accuracy = 100 * correct / total
     print(f"Accuracy: {accuracy:.2f}%")
 
@@ -154,7 +238,8 @@ def evaluate(model, test_loader):
     print(f"Recall: {recall:.2f}")
     print(f"F1 Score: {f1:.2f}")
 
-    # Log additional metrics
+    # LHERE WE DIFINE WHAT METRICS TO LOG TO WANDB
+    # THESE METRICS ARE DISPLAYED ON THE WANDB DASHBOARD
     wandb.log({
         "test_accuracy": accuracy,
         "test_precision": precision,
@@ -163,7 +248,8 @@ def evaluate(model, test_loader):
         "images_with_predictions": images_with_preds
     })
 
-    # Confusion matrix
+    # THE CONFUSION MATRIX IS PLOTTED AND LOGGED TO WANDB
+    # THE CONFUSION MATRIX SHOWS HOW MANY IMAGES WERE CORRECTLY CLASSIFIED
     cm = confusion_matrix(all_labels, all_preds)
     cm_display = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=range(10))
     cm_display.plot()
@@ -171,10 +257,9 @@ def evaluate(model, test_loader):
     wandb.log({"confusion_matrix": wandb.Image("confusion_matrix.png")})
 
 
-# Evaluate the model
 evaluate(model, test_loader)
 
-# Finish the wandb run
+# HERE WE FINISH THE WANDB RUN
 wandb.finish()
 
 
