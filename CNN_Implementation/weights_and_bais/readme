@@ -1,3 +1,46 @@
+# Weights and Biases Project Setup
+
+This guide will help you get started with tracking and visualizing your machine learning experiments using Weights and Biases (W&B).
+
+## Table of Contents
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Login to Weights and Biases](#login-to-weights-and-biases)
+- [Integrate W&B into Your Code](#integrate-wb-into-your-code)
+- [Run Your Code](#run-your-code)
+- [Viewing Results](#viewing-results)
+- [Further Reading](#further-reading)
+
+## Prerequisites
+- Python 3.6 or higher
+- An existing machine learning project (if you don't have one, you can start with a sample project)
+- A Weights and Biases account (sign up at [https://wandb.ai](https://wandb.ai))
+
+## Installation
+First, install the `wandb` library using pip:
+
+## Logging In
+Once you run the code. You will be required to login.
+RUN wandb login
+
+Once logged in. You can run this code and all the mertics will be logged on weights and bias library
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 THIS DIRECTORY CONTAINS 2 FILES. 
 
 A. SWEEP IMPLEMNTATION:
@@ -8,7 +51,4 @@ B. WANDB IMPLEMENTATION:
 
 This file contains the CNN model training with using weights and biases to log all the accuracy metrics and confusion metrix. A report is finally generated in the end showing the model outputs on the testing data. 
 
-LINK : https://wandb.ai/hanzalah-NUCES/mnist-classification/reports/Deep-CNN-for-MNIST-classification--Vmlldzo4NDg1MzU0
-
-
-LINK : https://wandb.ai/hanzalah-NUCES/mnist-classification/reports/Sweep-Runs-on-CNN--Vmlldzo4NDg3ODQ0
+LINK : https://api.wandb.ai/links/hanzalah-NUCES/zziszfx4x
